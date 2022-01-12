@@ -9,18 +9,23 @@ import Grid from '@mui/material/Grid';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import { Typography } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 const Main = () => {
     const [markers, setMarkers] = useState([]);
     const [marker, setMarker] = useState(null);
     const [focused, setFocused] = useState(null);
     const [open, setOpen] = useState(false);
-    const [openEvent, setOpenEvent] = useState(false);
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [type, setType] = useState("");
     const [snackOpen, setSnackOpen] = useState(false);
-    const [edit, setEdit] = useState(false)
+    const [edit, setEdit] = useState(false);
+    const [dialogueOpen, setDialogueOpen] = useState(false);
 
     useEffect(() => {
         const savedMarkers = JSON.parse(localStorage.getItem("markers"))
@@ -28,6 +33,11 @@ const Main = () => {
             setMarkers(savedMarkers);
         }
     }, [])
+
+
+    useEffect(() => {
+        localStorage.setItem("markers", JSON.stringify(markers))
+    }, [markers])
 
 
     const mapStyles = {
@@ -42,6 +52,9 @@ const Main = () => {
     const handleMapClick = (e) => {
         setMarker({ lng: e.latLng.lng(), lat: e.latLng.lat() });
         setOpen(true);
+        setName("");
+        setDescription("");
+        setType("");
     }
 
     const handleClickOpen = () => {
@@ -76,20 +89,17 @@ const Main = () => {
             name: name,
             description: description,
             type: type,
-            key: Math.floor(Math.random() * 1000000)
+            key: Math.floor(Math.random() * 1000000),
+            archived: false
         }, ...markers]
         setMarkers(allMarkers)
         console.log(allMarkers);
-        localStorage.setItem("markers", JSON.stringify(allMarkers))
     }
 
     const handleSave = () => {
         console.log(name, description, type)
         setOpen(false);
         setMarker(null);
-        setName("");
-        setDescription("");
-        setType("");
         addMarker();
         setSnackOpen(true);
     }
@@ -109,24 +119,60 @@ const Main = () => {
         setEdit(true);
     }
 
-    const handelUpdate = (key) => {
+    const handleUpdate = (key) => {
+        console.log(focused.key, key);
         const newMarkers = markers.map((marker) => {
-            if (focused.key === key) {
+            if (marker.key === key) {
                 const newMarker = {
-                    name: focused.name,
-                    key: key,
+                    name: name,
+                    description: description,
+                    type: type,
+                    key: marker.key,
+                    lat: marker.lat,
+                    lng: marker.lng,
+                    archived: false
                 }
+                setFocused(newMarker);
+                return newMarker
             }
+            return marker
         });
-        for (let marker of markers) {
-            const newMarker = {
-                name: focused.name,
-                key: focused.key,
-            }
-            newMarkers.push(marker.key === key ? newMarker : marker)
-        }
-
+        setMarkers(newMarkers)
+        console.log(newMarkers)
         setEdit(false);
+    }
+
+    const MarkerType = (m) => {
+        if (m.type === "poi") {
+            return "./interest.svg"
+        } else if (m.type === "hazard") {
+            return "./hazard.svg"
+        } else if (m.type === "report") {
+            return "./report.svg"
+        }
+    }
+
+    const handleDialogueOpen = () => {
+        setDialogueOpen(true);
+    };
+
+    const handleDialogueClose = () => {
+        setDialogueOpen(false);
+    };
+
+    const handleArchive = (key) => {
+        setDialogueOpen(false);
+        const archivedMarkers = markers.map((marker) => {
+            if (marker.key === key) {
+                const archived = {
+                    ...marker,
+                    archived: true
+                }
+                return archived
+            }
+            return marker
+        });
+        setMarkers(archivedMarkers)
     }
 
 
@@ -193,7 +239,13 @@ const Main = () => {
                         </div>
                     </InfoWindow>}
                 </Marker>)}
-                {markers && markers.map((m) => <Marker position={m} key={m.key} onClick={() => setFocused(m)}>
+                {markers && markers.filter(marker => marker.archived === false).map((m) => <Marker
+                    position={m}
+                    key={m.key}
+                    onClick={() => setFocused(m)}
+                    //scaledSize: new window.google.maps.Size(40, 40) not working
+                    icon={MarkerType(m)}
+                >
 
                 </Marker>)}
 
@@ -246,7 +298,7 @@ const Main = () => {
                             </Button>}
                             {edit && <Button
                                 variant="contained"
-                                onClick={() => handelUpdate({ key: focused.key })}
+                                onClick={() => handleUpdate(focused.key)}
                             >
                                 Update
                             </Button>
@@ -255,19 +307,38 @@ const Main = () => {
                         <Grid item xs={12} p={1}>
                             <Button
                                 variant="contained"
+                                onClick={handleDialogueOpen}
                             >
                                 Archive
                             </Button>
                         </Grid>
+                        <Dialog
+                            open={dialogueOpen}
+                            onClose={handleDialogueClose}
+                            aria-labelledby="alert-dialog-title"
+                            aria-describedby="alert-dialog-description"
+                        >
+                            <DialogContent>
+                                <DialogContentText id="alert-dialog-description">
+                                    Are you sure you would like to archive {name}?
+                                </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={handleDialogueClose}>No</Button>
+                                <Button onClick={() => handleArchive(focused.key)} autoFocus>
+                                    Yes
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
                     </div>
                 </InfoWindow>)}
                 <Snackbar open={snackOpen} autoHideDuration={5000} onClose={handleClose}>
                     <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
-                        Event {marker?.name} has been successfully saved
+                        Event "{name}" has been successfully saved
                     </Alert>
                 </Snackbar>
             </GoogleMap>
-        </LoadScript>
+        </LoadScript >
     )
 }
 
