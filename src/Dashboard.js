@@ -69,6 +69,9 @@ export default function Dashboard(props) {
     const [open, setOpen] = React.useState(true);
     const { markers, setMarkers, hoveredMarkerId, setHoveredMarkerId, focused, setFocused } = useContext(MarkerContext);
 
+    const existingMarkers = markers.filter(marker => marker.archived === false)
+
+
     const Type = (marker, hovered) => {
         if (marker.type === "poi") {
             return "./interest.png"
@@ -113,8 +116,8 @@ export default function Dashboard(props) {
                     >
                         <List sx={{ overflow: 'auto', maxWidth: 360, flexGrow: 1 }}>
 
-                            {!markers ? "No events" :
-                                markers.filter(marker => marker.archived === false).map((marker) => <ListItem
+                            {existingMarkers.length ?
+                                existingMarkers.map((marker) => <ListItem
                                     alignItems="flex-start"
                                     onMouseOver={() => handleHover(marker.key)}
                                     onMouseOut={() => handleHover(null)}
@@ -151,11 +154,12 @@ export default function Dashboard(props) {
                                             </div>
                                         }
                                     />
-                                </ListItem>)
+                                </ListItem>) :
+                                "No events"
 
                             }
                         </List>
-                        <Footer />
+                        {existingMarkers.length > 0 && <Footer />}
                     </Toolbar>
                 </Drawer>
                 <Box
