@@ -13,12 +13,17 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
+import { useContext } from 'react';
+import { MarkerContext } from './App';
+
+const defaultCenter = {
+    lat: 41.3851, lng: 2.1734
+}
+
+const defualtZoom = 13;
 
 const Main = () => {
-    const [markers, setMarkers] = useState([]);
     const [marker, setMarker] = useState(null);
-    const [focused, setFocused] = useState(null);
     const [open, setOpen] = useState(false);
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
@@ -26,18 +31,10 @@ const Main = () => {
     const [snackOpen, setSnackOpen] = useState(false);
     const [edit, setEdit] = useState(false);
     const [dialogueOpen, setDialogueOpen] = useState(false);
+    const [mapCenter, setMapCenter] = useState(defaultCenter);
+    const [zoom, setZoom] = useState(defualtZoom)
 
-    useEffect(() => {
-        const savedMarkers = JSON.parse(localStorage.getItem("markers"))
-        if (savedMarkers) {
-            setMarkers(savedMarkers);
-        }
-    }, [])
-
-
-    useEffect(() => {
-        localStorage.setItem("markers", JSON.stringify(markers))
-    }, [markers])
+    const { markers, setMarkers, hoveredMarkerId, setHoveredMarkerId, focused, setFocused } = useContext(MarkerContext);
 
 
     const mapStyles = {
@@ -45,9 +42,12 @@ const Main = () => {
         width: "100%"
     };
 
-    const defaultCenter = {
-        lat: 41.3851, lng: 2.1734
-    }
+    useEffect(() => {
+        if (focused) {
+            setMapCenter(focused)
+            setZoom(defualtZoom)
+        }
+    }, [focused])
 
     const handleMapClick = (e) => {
         setMarker({ lng: e.latLng.lng(), lat: e.latLng.lat() });
@@ -89,8 +89,9 @@ const Main = () => {
             name: name,
             description: description,
             type: type,
-            key: Math.floor(Math.random() * 1000000),
-            archived: false
+            key: Math.floor(Math.random() * 10000000),
+            archived: false,
+            date: (new Date()).toLocaleString()
         }, ...markers]
         setMarkers(allMarkers)
         console.log(allMarkers);
@@ -102,6 +103,7 @@ const Main = () => {
         setMarker(null);
         addMarker();
         setSnackOpen(true);
+
     }
 
     const handleClose = (event, reason) => {
@@ -130,6 +132,7 @@ const Main = () => {
                     key: marker.key,
                     lat: marker.lat,
                     lng: marker.lng,
+                    date: (new Date()).toLocaleString(),
                     archived: false
                 }
                 setFocused(newMarker);
@@ -142,13 +145,26 @@ const Main = () => {
         setEdit(false);
     }
 
-    const MarkerType = (m) => {
-        if (m.type === "poi") {
-            return "./interest.svg"
-        } else if (m.type === "hazard") {
-            return "./hazard.svg"
-        } else if (m.type === "report") {
-            return "./report.svg"
+    const MarkerType = (marker, hovered) => {
+        let url = null;
+        if (marker.type === "poi") {
+            url = "./interest.png"
+        } else if (marker.type === "hazard") {
+            url = "./hazard.png"
+        } else if (marker.type === "report") {
+            url = "./report.png"
+        }
+        if (!window.google) {
+            return url
+        }
+
+        const size = hovered ? new window.google.maps.Size(64, 64) : new window.google.maps.Size(48, 48)
+        const anchor = hovered ? new window.google.maps.Point(32, 32) : new window.google.maps.Point(24, 24)
+
+        return {
+            url: url,
+            scaledSize: size,
+            anchor: anchor
         }
     }
 
@@ -173,6 +189,15 @@ const Main = () => {
             return marker
         });
         setMarkers(archivedMarkers)
+        setOpen(false)
+    }
+
+    const handleMarkerHover = (key) => {
+        setHoveredMarkerId(key);
+    }
+
+    const handleVisible = () => {
+        console.log("hello")
     }
 
 
@@ -182,9 +207,10 @@ const Main = () => {
             <GoogleMap
                 onClick={handleMapClick}
                 mapContainerStyle={mapStyles}
-                zoom={13}
-                center={defaultCenter}
+                zoom={zoom}
+                center={mapCenter}
                 clickableIcons={false}
+                onBoundsChanged={handleVisible}
             >
                 {marker && (<Marker
                     position={marker}
@@ -243,8 +269,9 @@ const Main = () => {
                     position={m}
                     key={m.key}
                     onClick={() => setFocused(m)}
-                    //scaledSize: new window.google.maps.Size(40, 40) not working
-                    icon={MarkerType(m)}
+                    icon={MarkerType(m, m.key === hoveredMarkerId)}
+                    onMouseOver={() => handleMarkerHover(m.key)}
+                    onMouseOut={() => handleMarkerHover(null)}
                 >
 
                 </Marker>)}
@@ -253,7 +280,7 @@ const Main = () => {
                     position={focused}
                     onCloseClick={handleEventClose}
                 >
-                    <div>
+                    <div style={{ textAlign: "left" }}>
                         <Grid item xs={12} p={1}>
                             {edit ? (<TextField
                                 fullWidth
@@ -293,11 +320,13 @@ const Main = () => {
                             {!edit && <Button
                                 variant="contained"
                                 onClick={handleEdit}
+                                fullWidth
                             >
                                 Edit
                             </Button>}
                             {edit && <Button
                                 variant="contained"
+                                fullWidth
                                 onClick={() => handleUpdate(focused.key)}
                             >
                                 Update
@@ -307,6 +336,7 @@ const Main = () => {
                         <Grid item xs={12} p={1}>
                             <Button
                                 variant="contained"
+                                fullWidth
                                 onClick={handleDialogueOpen}
                             >
                                 Archive

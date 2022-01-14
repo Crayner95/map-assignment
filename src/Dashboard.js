@@ -5,10 +5,15 @@ import MuiDrawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import MuiAppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
+import { useContext } from 'react';
+import { MarkerContext } from './App';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import Footer from './Footer';
 
 
 const drawerWidth = 240;
@@ -62,6 +67,35 @@ const mdTheme = createTheme();
 
 export default function Dashboard(props) {
     const [open, setOpen] = React.useState(true);
+    const { markers, setMarkers, hoveredMarkerId, setHoveredMarkerId, focused, setFocused } = useContext(MarkerContext);
+
+    const Type = (marker, hovered) => {
+        if (marker.type === "poi") {
+            return "./interest.png"
+        } else if (marker.type === "hazard") {
+            return "./hazard.png"
+        } else if (marker.type === "report") {
+            return "./report.png"
+        }
+    }
+
+    const typeName = (marker) => {
+        if (marker.type === "poi") {
+            return "Point of Interest"
+        } else if (marker.type === "hazard") {
+            return "Hazard"
+        } else if (marker.type === "report") {
+            return "Report"
+        }
+    }
+
+    const handleHover = (key) => {
+        setHoveredMarkerId(key);
+    }
+
+    const handleEventClick = (marker) => {
+        setFocused(marker)
+    }
 
     return (
         <ThemeProvider theme={mdTheme}>
@@ -70,10 +104,58 @@ export default function Dashboard(props) {
                 <Drawer variant="permanent" open={open}>
                     <Toolbar
                         sx={{
-                            px: [1],
+                            px: [0],
+                            display: "flex",
+                            flexDirection: 'column',
+                            height: '100vh',
+                            alignItems: 'stretch'
                         }}
                     >
-                        No events. Click anywhere on the map to create a new event.
+                        <List sx={{ overflow: 'auto', maxWidth: 360, flexGrow: 1 }}>
+
+                            {!markers ? "No events" :
+                                markers.filter(marker => marker.archived === false).map((marker) => <ListItem
+                                    alignItems="flex-start"
+                                    onMouseOver={() => handleHover(marker.key)}
+                                    onMouseOut={() => handleHover(null)}
+                                    onClick={() => handleEventClick(marker)}
+                                    key={marker.key}
+                                    sx={{ bgcolor: marker.key === hoveredMarkerId ? '#eee' : 'white', cursor: 'pointer' }}>
+                                    <ListItemAvatar>
+                                        <Avatar alt="image" src={Type(marker)} />
+                                    </ListItemAvatar>
+                                    <ListItemText
+                                        primary={marker.name}
+                                        secondary={
+                                            <div>
+                                                <div>
+                                                    <Typography
+                                                        sx={{ display: 'inline' }}
+                                                        component="span"
+                                                        variant="body2"
+                                                        color="text.primary"
+                                                    >
+                                                        {typeName(marker)}
+                                                    </Typography>
+                                                </div>
+                                                <div>
+                                                    <Typography
+                                                        sx={{ display: 'inline' }}
+                                                        component="span"
+                                                        variant="body2"
+                                                        color="text.primary"
+                                                    >
+                                                        {marker.date}
+                                                    </Typography>
+                                                </div>
+                                            </div>
+                                        }
+                                    />
+                                </ListItem>)
+
+                            }
+                        </List>
+                        <Footer />
                     </Toolbar>
                 </Drawer>
                 <Box
