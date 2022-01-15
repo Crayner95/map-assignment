@@ -125,11 +125,27 @@ const Main = () => {
                 clickableIcons={false}
                 onBoundsChanged={handleVisible}
             >
-                {marker && (<NewEventMarker marker={marker} setMarker={setMarker} snackBar={snackBar} addMarker={addMarker} />)}
+                {marker &&
+                    (<NewEventMarker
+                        marker={marker}
+                        setMarker={setMarker}
+                        snackBar={snackBar}
+                        addMarker={addMarker}
+                    />)}
                 {markers && markers.filter(marker => marker.archived === false).map((m) => <EventMarker m={m} />)}
 
-                {focused && (<EditInfoWindow focused={focused} handleUpdate={handleUpdate} handleArchive={handleArchive} setFocused={setFocused} />)}
-                <Snackbar open={snackOpen} autoHideDuration={5000} onClose={handleClose}>
+                {focused &&
+                    (<EditInfoWindow
+                        focused={focused}
+                        handleUpdate={handleUpdate}
+                        handleArchive={handleArchive}
+                        setFocused={setFocused}
+                    />)}
+                <Snackbar
+                    open={snackOpen}
+                    autoHideDuration={5000}
+                    onClose={handleClose}
+                >
                     <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
                         {message}
                     </Alert>
