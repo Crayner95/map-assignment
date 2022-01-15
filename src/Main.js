@@ -15,6 +15,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import { useContext } from 'react';
 import { MarkerContext } from './App';
+import EventMarker from './EventMarker';
 
 const defaultCenter = {
     lat: 41.3851, lng: 2.1734
@@ -34,7 +35,7 @@ const Main = () => {
     const [mapCenter, setMapCenter] = useState(defaultCenter);
     const [zoom, setZoom] = useState(defualtZoom)
 
-    const { markers, setMarkers, hoveredMarkerId, setHoveredMarkerId, focused, setFocused } = useContext(MarkerContext);
+    const { markers, setMarkers, focused, setFocused } = useContext(MarkerContext);
 
 
     const mapStyles = {
@@ -145,29 +146,6 @@ const Main = () => {
         setEdit(false);
     }
 
-    const MarkerType = (marker, hovered) => {
-        let url = null;
-        if (marker.type === "poi") {
-            url = "./interest.png"
-        } else if (marker.type === "hazard") {
-            url = "./hazard.png"
-        } else if (marker.type === "report") {
-            url = "./report.png"
-        }
-        if (!window.google) {
-            return url
-        }
-
-        const size = hovered ? new window.google.maps.Size(64, 64) : new window.google.maps.Size(48, 48)
-        const anchor = hovered ? new window.google.maps.Point(32, 32) : new window.google.maps.Point(24, 24)
-
-        return {
-            url: url,
-            scaledSize: size,
-            anchor: anchor
-        }
-    }
-
     const handleDialogueOpen = () => {
         setDialogueOpen(true);
     };
@@ -192,9 +170,6 @@ const Main = () => {
         setOpen(false)
     }
 
-    const handleMarkerHover = (key) => {
-        setHoveredMarkerId(key);
-    }
 
     const handleVisible = () => {
         console.log("hello")
@@ -265,16 +240,7 @@ const Main = () => {
                         </div>
                     </InfoWindow>}
                 </Marker>)}
-                {markers && markers.filter(marker => marker.archived === false).map((m) => <Marker
-                    position={m}
-                    key={m.key}
-                    onClick={() => setFocused(m)}
-                    icon={MarkerType(m, m.key === hoveredMarkerId)}
-                    onMouseOver={() => handleMarkerHover(m.key)}
-                    onMouseOut={() => handleMarkerHover(null)}
-                >
-
-                </Marker>)}
+                {markers && markers.filter(marker => marker.archived === false).map((m) => <EventMarker m={m} />)}
 
                 {focused && (<InfoWindow
                     position={focused}
