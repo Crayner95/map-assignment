@@ -16,6 +16,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import { useContext } from 'react';
 import { MarkerContext } from './App';
 import EventMarker from './EventMarker';
+import NewEventMarker from './NewEventMarker';
 
 const defaultCenter = {
     lat: 41.3851, lng: 2.1734
@@ -25,7 +26,6 @@ const defualtZoom = 13;
 
 const Main = () => {
     const [marker, setMarker] = useState(null);
-    const [open, setOpen] = useState(false);
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [type, setType] = useState("");
@@ -33,7 +33,8 @@ const Main = () => {
     const [edit, setEdit] = useState(false);
     const [dialogueOpen, setDialogueOpen] = useState(false);
     const [mapCenter, setMapCenter] = useState(defaultCenter);
-    const [zoom, setZoom] = useState(defualtZoom)
+    const [zoom, setZoom] = useState(defualtZoom);
+    const [message, setMessage] = useState("")
 
     const { markers, setMarkers, focused, setFocused } = useContext(MarkerContext);
 
@@ -52,20 +53,11 @@ const Main = () => {
 
     const handleMapClick = (e) => {
         setMarker({ lng: e.latLng.lng(), lat: e.latLng.lat() });
-        setOpen(true);
         setName("");
         setDescription("");
         setType("");
     }
 
-    const handleClickOpen = () => {
-        setOpen(true)
-    }
-
-    const handleFormClose = () => {
-        setMarker(null);
-        setOpen(false);
-    }
 
     const handleEventClose = () => {
         setFocused(null);
@@ -83,7 +75,7 @@ const Main = () => {
         setType(e.target.value)
     }
 
-    const addMarker = () => {
+    const addMarker = (name, description, type) => {
         const allMarkers = [{
             lat: marker.lat,
             lng: marker.lng,
@@ -98,14 +90,6 @@ const Main = () => {
         console.log(allMarkers);
     }
 
-    const handleSave = () => {
-        console.log(name, description, type)
-        setOpen(false);
-        setMarker(null);
-        addMarker();
-        setSnackOpen(true);
-
-    }
 
     const handleClose = (event, reason) => {
         if (reason === 'clickaway') {
@@ -167,12 +151,16 @@ const Main = () => {
             return marker
         });
         setMarkers(archivedMarkers)
-        setOpen(false)
     }
 
 
     const handleVisible = () => {
         console.log("hello")
+    }
+
+    const snackBar = (message) => {
+        setMessage(message);
+        setSnackOpen(true);
     }
 
 
@@ -187,59 +175,7 @@ const Main = () => {
                 clickableIcons={false}
                 onBoundsChanged={handleVisible}
             >
-                {marker && (<Marker
-                    position={marker}
-                    onClick={handleClickOpen}
-                >
-                    {open && <InfoWindow
-                        onCloseClick={handleFormClose}
-                    >
-                        <div>
-                            <Grid item xs={12} p={1}>
-                                <TextField
-                                    fullWidth
-                                    id="name"
-                                    label="Name"
-                                    value={name}
-                                    onChange={handleChangeName}
-                                />
-                            </Grid>
-                            <Grid item xs={12} p={1}>
-                                <TextField
-                                    id="description"
-                                    label="Description"
-                                    value={description}
-                                    onChange={handleChangeDescription}
-                                    multiline
-                                    rows={4}
-                                />
-                            </Grid>
-                            <Grid item xs={12} p={1}>
-                                <Select
-                                    fullWidth
-                                    labelId="type"
-                                    id="type"
-                                    value={type}
-                                    label="Type"
-                                    onChange={handleChangeType}
-                                >
-                                    <MenuItem value={"poi"}>Point of Interest</MenuItem>
-                                    <MenuItem value={"hazard"}>Hazard</MenuItem>
-                                    <MenuItem value={"report"}>Report</MenuItem>
-                                </Select>
-                            </Grid>
-                            <Grid item xs={12} p={1}>
-                                <Button
-                                    fullWidth
-                                    variant="contained"
-                                    onClick={handleSave}
-                                >
-                                    Save
-                                </Button>
-                            </Grid>
-                        </div>
-                    </InfoWindow>}
-                </Marker>)}
+                {marker && (<NewEventMarker marker={marker} setMarker={setMarker} snackBar={snackBar} addMarker={addMarker} />)}
                 {markers && markers.filter(marker => marker.archived === false).map((m) => <EventMarker m={m} />)}
 
                 {focused && (<InfoWindow
@@ -263,7 +199,7 @@ const Main = () => {
                                 id="description"
                                 label="Description"
                                 value={description}
-                                onChange={handleChangeName}
+                                onChange={handleChangeDescription}
                             />)
                                 : <Typography> Description: {focused.description} </Typography>}
                         </Grid>
@@ -330,7 +266,7 @@ const Main = () => {
                 </InfoWindow>)}
                 <Snackbar open={snackOpen} autoHideDuration={5000} onClose={handleClose}>
                     <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
-                        Event "{name}" has been successfully saved
+                        {message}
                     </Alert>
                 </Snackbar>
             </GoogleMap>
