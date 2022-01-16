@@ -17,12 +17,13 @@ const defualtZoom = 13;
 
 const Main = () => {
     const [marker, setMarker] = useState(null);
+    const [loadingMarkersOnMap, setLoadingMarkersOnMap] = useState(false)
     const [snackOpen, setSnackOpen] = useState(false);
     const [mapCenter, setMapCenter] = useState(defaultCenter);
     const [zoom, setZoom] = useState(defualtZoom);
     const [message, setMessage] = useState("");
     const [map, setMap] = useState(null);
-
+    const [googleMapInstance, setGoogleMapInstance] = useState(null)
     const { markers, setMarkers, focused, setFocused, visibleMarker, setVisibleMarker } = useContext(MarkerContext);
 
 
@@ -124,7 +125,7 @@ const Main = () => {
     }
 
     useEffect(() => {
-        console.log(visibleMarker)
+        // console.log(visibleMarker)
     }, [visibleMarker])
 
     const snackBar = (message) => {
@@ -134,19 +135,18 @@ const Main = () => {
 
     const handleMapLoad = (m) => {
         setMap(m)
-    }
-
-    useEffect(() => {
-        if (!window.google) {
-            return
-        }
         const mapMarkers = new window.google.maps.LatLngBounds();
         for (let i = 0; i < markers.length; i++) {
             mapMarkers.extend(markers[i]);
         }
-        map.fitBounds(mapMarkers);
+        m.fitBounds(mapMarkers);
+    }
 
-    }, [markers])
+    // useEffect(() => {
+    //     if (!googleMapInstance) return
+
+    //     setMap(googleMapInstance)
+    // }, [googleMapInstance])
 
 
 
