@@ -17,15 +17,15 @@ const defualtZoom = 13;
 
 const Main = () => {
     const [marker, setMarker] = useState(null);
-    const [loadingMarkersOnMap, setLoadingMarkersOnMap] = useState(false)
     const [snackOpen, setSnackOpen] = useState(false);
     const [mapCenter, setMapCenter] = useState(defaultCenter);
     const [zoom, setZoom] = useState(defualtZoom);
     const [message, setMessage] = useState("");
     const [map, setMap] = useState(null);
-    const [googleMapInstance, setGoogleMapInstance] = useState(null)
     const { markers, setMarkers, focused, setFocused, visibleMarker, setVisibleMarker } = useContext(MarkerContext);
 
+
+    const existingMarkers = markers.filter(marker => marker.archived === false)
 
     const mapStyles = {
         height: "100vh",
@@ -111,7 +111,6 @@ const Main = () => {
             return
         }
         const bounds = map.getBounds()
-        console.log(bounds)
 
         const poiCount = markers.filter(m => m.type === "poi" && bounds.contains({ lat: m.lat, lng: m.lng }))
         const hazardCount = markers.filter(m => m.type === "hazard" && bounds.contains({ lat: m.lat, lng: m.lng }))
@@ -124,9 +123,6 @@ const Main = () => {
         })
     }
 
-    useEffect(() => {
-        // console.log(visibleMarker)
-    }, [visibleMarker])
 
     const snackBar = (message) => {
         setMessage(message);
@@ -136,18 +132,11 @@ const Main = () => {
     const handleMapLoad = (m) => {
         setMap(m)
         const mapMarkers = new window.google.maps.LatLngBounds();
-        for (let i = 0; i < markers.length; i++) {
-            mapMarkers.extend(markers[i]);
+        for (let i = 0; i < existingMarkers.length; i++) {
+            mapMarkers.extend(existingMarkers[i]);
         }
         m.fitBounds(mapMarkers);
     }
-
-    // useEffect(() => {
-    //     if (!googleMapInstance) return
-
-    //     setMap(googleMapInstance)
-    // }, [googleMapInstance])
-
 
 
     return (

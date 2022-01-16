@@ -12,7 +12,7 @@ import { InfoWindow } from '@react-google-maps/api';
 import { useState } from 'react';
 
 
-export default function EditInfoWindow({ focused, handleUpdate, handleArchive, setFocused }) {
+export default function EditInfoWindow({ focused, handleUpdate, handleArchive, setFocused, setOpen, open }) {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [type, setType] = useState("");
@@ -41,6 +41,7 @@ export default function EditInfoWindow({ focused, handleUpdate, handleArchive, s
 
     const handleDialogueClose = () => {
         setDialogueOpen(false);
+        setFocused(null);
     };
 
     const handleEdit = () => {
@@ -58,6 +59,7 @@ export default function EditInfoWindow({ focused, handleUpdate, handleArchive, s
     const handleArchiveButton = () => {
         setDialogueOpen(false)
         handleArchive(focused.key)
+        setFocused(null);
     }
 
     return (

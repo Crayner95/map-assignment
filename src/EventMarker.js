@@ -17,6 +17,8 @@ export default function EventMarker({ m }) {
             url = "./hazard.png"
         } else if (marker.type === "report") {
             url = "./report.png"
+        } else if (marker.type === "") {
+            url = "./default.png"
         }
         if (!window.google) {
             return url

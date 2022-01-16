@@ -67,7 +67,7 @@ const mdTheme = createTheme();
 
 export default function Dashboard(props) {
     const [open, setOpen] = React.useState(true);
-    const { markers, setMarkers, hoveredMarkerId, setHoveredMarkerId, focused, setFocused, visibleMarker, setVisibleMarker } = useContext(MarkerContext);
+    const { markers, hoveredMarkerId, setHoveredMarkerId, setFocused } = useContext(MarkerContext);
 
     const existingMarkers = markers.filter(marker => marker.archived === false)
 
@@ -79,6 +79,8 @@ export default function Dashboard(props) {
             return "./hazard.png"
         } else if (marker.type === "report") {
             return "./report.png"
+        } else if (marker.type === "") {
+            return "./default.png"
         }
     }
 

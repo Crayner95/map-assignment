@@ -16,9 +16,9 @@ export default function Footer() {
         return null
     }
 
-    const poiVisible = visibleMarker.poi.length;
-    const hazardVisible = visibleMarker.hazard.length;
-    const reportVisible = visibleMarker.report.length;
+    const poiVisible = visibleMarker.poi.filter(marker => marker.archived === false).length;
+    const hazardVisible = visibleMarker.hazard.filter(marker => marker.archived === false).length;
+    const reportVisible = visibleMarker.report.filter(marker => marker.archived === false).length;
     const totalVisible = poiVisible + hazardVisible + reportVisible
 
     return (
