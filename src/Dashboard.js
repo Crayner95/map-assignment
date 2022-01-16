@@ -79,8 +79,6 @@ export default function Dashboard(props) {
             return "./hazard.png"
         } else if (marker.type === "report") {
             return "./report.png"
-        } else if (marker.type === "") {
-            return "./default.png"
         }
     }
 

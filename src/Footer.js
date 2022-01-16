@@ -23,7 +23,7 @@ export default function Footer() {
 
     return (
         <Box elevation={0} sx={{ display: 'flex', justifyContent: "space-between", alignItems: 'center', padding: "15px", bgcolor: '#eee', textAlign: "left", overflowX: 'scroll', fontSize: "12px" }}>
-            < div > <img src="./interest.png" style={{ width: "12px" }}></img> {poiVisible}/{poiCount} </div >
+            <div><img src="./interest.png" style={{ width: "12px" }}></img> {poiVisible}/{poiCount}</div>
             <div><img src="./hazard.png" style={{ width: "12px" }}></img> {hazardVisible}/{hazardCount}</div>
             <div> <img src="./report.png" style={{ width: "12px" }}></img> {reportVisible}/{reportCount}</div>
             <div> Total {totalVisible}/{totalCount}</div>

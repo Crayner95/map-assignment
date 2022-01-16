@@ -5,6 +5,8 @@ import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import { useState, useEffect } from 'react';
+import { InputLabel, FormControl } from '@mui/material';
+
 
 
 
@@ -76,24 +78,28 @@ export default function NewEventMarker({ marker, setMarker, snackBar, addMarker 
                         />
                     </Grid>
                     <Grid item xs={12} p={1}>
-                        <Select
-                            fullWidth
-                            labelId="type"
-                            id="type"
-                            value={type}
-                            label="Type"
-                            onChange={handleChangeType}
-                        >
-                            <MenuItem value={"poi"}>Point of Interest</MenuItem>
-                            <MenuItem value={"hazard"}>Hazard</MenuItem>
-                            <MenuItem value={"report"}>Report</MenuItem>
-                        </Select>
+                        <FormControl fullWidth>
+                            <InputLabel>Type</InputLabel>
+                            <Select
+                                fullWidth
+                                labelId="type"
+                                id="type"
+                                value={type}
+                                label="Type"
+                                onChange={handleChangeType}
+                            >
+                                <MenuItem value={"poi"}>Point of Interest</MenuItem>
+                                <MenuItem value={"hazard"}>Hazard</MenuItem>
+                                <MenuItem value={"report"}>Report</MenuItem>
+                            </Select>
+                        </FormControl>
                     </Grid>
                     <Grid item xs={12} p={1}>
                         <Button
                             fullWidth
                             variant="contained"
                             onClick={handleSave}
+                            disabled={type === ""}
                         >
                             Save
                         </Button>

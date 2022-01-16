@@ -12,7 +12,7 @@ import { InfoWindow } from '@react-google-maps/api';
 import { useState } from 'react';
 
 
-export default function EditInfoWindow({ focused, handleUpdate, handleArchive, setFocused, setOpen, open }) {
+export default function EditInfoWindow({ focused, handleUpdate, handleArchive, setFocused }) {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [type, setType] = useState("");
