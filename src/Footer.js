@@ -5,16 +5,20 @@ import { MarkerContext } from './App';
 
 
 export default function Footer() {
-    const { markers, setMarkers } = useContext(MarkerContext);
+    const { markers, visibleMarker } = useContext(MarkerContext);
 
     const poiCount = markers.filter(marker => marker.type === "poi" && marker.archived === false).length
     const hazardCount = markers.filter(marker => marker.type === "hazard" && marker.archived === false).length;
     const reportCount = markers.filter(marker => marker.type === "report" && marker.archived === false).length;
     const totalCount = poiCount + hazardCount + reportCount
 
-    const poiVisible = 15;
-    const hazardVisible = 18;
-    const reportVisible = 15;
+    if (!visibleMarker) {
+        return null
+    }
+
+    const poiVisible = visibleMarker.poi.length;
+    const hazardVisible = visibleMarker.hazard.length;
+    const reportVisible = visibleMarker.report.length;
     const totalVisible = poiVisible + hazardVisible + reportVisible
 
     return (

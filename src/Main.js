@@ -20,9 +20,10 @@ const Main = () => {
     const [snackOpen, setSnackOpen] = useState(false);
     const [mapCenter, setMapCenter] = useState(defaultCenter);
     const [zoom, setZoom] = useState(defualtZoom);
-    const [message, setMessage] = useState("")
+    const [message, setMessage] = useState("");
+    const [map, setMap] = useState(null);
 
-    const { markers, setMarkers, focused, setFocused } = useContext(MarkerContext);
+    const { markers, setMarkers, focused, setFocused, visibleMarker, setVisibleMarker } = useContext(MarkerContext);
 
 
     const mapStyles = {
@@ -105,13 +106,48 @@ const Main = () => {
 
 
     const handleVisible = () => {
-        console.log("hello")
+        if (!map) {
+            return
+        }
+        const bounds = map.getBounds()
+        console.log(bounds)
+
+        const poiCount = markers.filter(m => m.type === "poi" && bounds.contains({ lat: m.lat, lng: m.lng }))
+        const hazardCount = markers.filter(m => m.type === "hazard" && bounds.contains({ lat: m.lat, lng: m.lng }))
+        const reportCount = markers.filter(m => m.type === "report" && bounds.contains({ lat: m.lat, lng: m.lng }))
+
+        setVisibleMarker({
+            poi: poiCount,
+            hazard: hazardCount,
+            report: reportCount
+        })
     }
+
+    useEffect(() => {
+        console.log(visibleMarker)
+    }, [visibleMarker])
 
     const snackBar = (message) => {
         setMessage(message);
         setSnackOpen(true);
     }
+
+    const handleMapLoad = (m) => {
+        setMap(m)
+    }
+
+    useEffect(() => {
+        if (!window.google) {
+            return
+        }
+        const mapMarkers = new window.google.maps.LatLngBounds();
+        for (let i = 0; i < markers.length; i++) {
+            mapMarkers.extend(markers[i]);
+        }
+        map.fitBounds(mapMarkers);
+
+    }, [markers])
+
 
 
     return (
@@ -124,6 +160,7 @@ const Main = () => {
                 center={mapCenter}
                 clickableIcons={false}
                 onBoundsChanged={handleVisible}
+                onLoad={handleMapLoad}
             >
                 {marker &&
                     (<NewEventMarker

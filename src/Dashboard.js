@@ -67,7 +67,7 @@ const mdTheme = createTheme();
 
 export default function Dashboard(props) {
     const [open, setOpen] = React.useState(true);
-    const { markers, setMarkers, hoveredMarkerId, setHoveredMarkerId, focused, setFocused } = useContext(MarkerContext);
+    const { markers, setMarkers, hoveredMarkerId, setHoveredMarkerId, focused, setFocused, visibleMarker, setVisibleMarker } = useContext(MarkerContext);
 
     const existingMarkers = markers.filter(marker => marker.archived === false)
 

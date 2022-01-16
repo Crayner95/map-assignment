@@ -5,13 +5,14 @@ import './App.css';
 import { useEffect, useState, createContext } from 'react';
 
 
-export const MarkerContext = createContext({ markers: null, setMarkers: () => { }, hoveredMarkerId: null, setHoveredMarkerId: () => { }, focused: null, setFocused: () => { } })
+export const MarkerContext = createContext({ markers: null, setMarkers: () => { }, hoveredMarkerId: null, setHoveredMarkerId: () => { }, focused: null, setFocused: () => { }, visibleMarker: null, setVisibleMarker: () => { } })
 
 
 function App() {
   const [markers, setMarkers] = useState([]);
   const [hoveredMarkerId, setHoveredMarkerId] = useState(null);
   const [focused, setFocused] = useState(null);
+  const [visibleMarker, setVisibleMarker] = useState(null);
 
   useEffect(() => {
     const savedMarkers = JSON.parse(localStorage.getItem("markers"))
@@ -29,7 +30,7 @@ function App() {
   return (
     <div className="App">
       <Router>
-        <MarkerContext.Provider value={{ markers, setMarkers, hoveredMarkerId, setHoveredMarkerId, focused, setFocused }}>
+        <MarkerContext.Provider value={{ markers, setMarkers, hoveredMarkerId, setHoveredMarkerId, focused, setFocused, visibleMarker, setVisibleMarker }}>
           <Switch>
             <Route exact path="/">
               <Dashboard>
